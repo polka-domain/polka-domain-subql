@@ -138,8 +138,8 @@ dataSources:
           filter:
             module: auction
             method: AuctionEnd
-        
-        - handler: nameTransferEvent
+
+        - handler: nameAssertTransferEvent
           kind: substrate/EventHandler
           filter:
             module: balances

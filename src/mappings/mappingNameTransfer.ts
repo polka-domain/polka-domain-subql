@@ -1,11 +1,10 @@
-import { SubstrateExtrinsic, SubstrateEvent, SubstrateBlock } from "@subql/types";
+import {  SubstrateEvent } from "@subql/types";
 import { AccountId, Balance, BlockNumber } from '@polkadot/types/interfaces/runtime';
 import type { Compact} from '@polkadot/types';
-import {hexToUtf8} from '../helpers/common'
 import { NameTransfer } from "../types/models/NameTransfer";
 import { AccountHandler } from '../handlers/sub-handlers/account';
 
-export async function nameTransferEvent(event: SubstrateEvent): Promise<void> {
+export async function nameAssertTransferEvent(event: SubstrateEvent): Promise<void> {
     const { event: { data: [from_origin, to_origin, amount_origin] } } = event;
     const from = (from_origin as AccountId).toString();
     const to = (to_origin as AccountId).toString();
