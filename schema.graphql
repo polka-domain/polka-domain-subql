@@ -159,4 +159,5 @@ type NameTransfer @entity {
   to: Account
   amount: BigInt
   timestamp: Date
+  extrinsic: Extrinsic
 }

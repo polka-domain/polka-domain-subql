@@ -3,6 +3,7 @@ import { AccountId, Balance, BlockNumber } from '@polkadot/types/interfaces/runt
 import type { Compact} from '@polkadot/types';
 import { NameTransfer } from "../types/models/NameTransfer";
 import { AccountHandler } from '../handlers/sub-handlers/account';
+import { ExtrinsicHandler } from '../handlers/extrinsic'
 
 export async function nameAssertTransferEvent(event: SubstrateEvent): Promise<void> {
     const { event: { data: [from_origin, to_origin, amount_origin] } } = event;
@@ -19,6 +20,7 @@ export async function nameAssertTransferEvent(event: SubstrateEvent): Promise<vo
     record.toId = to;
     record.amount = amount;
     record.timestamp = event.block.timestamp;
+    record.extrinsicId = new ExtrinsicHandler(event.extrinsic).id;
 
     await record.save();
 }
