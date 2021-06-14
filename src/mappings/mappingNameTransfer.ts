@@ -3,7 +3,7 @@ import { AccountId, Balance, BlockNumber } from '@polkadot/types/interfaces/runt
 import type { Compact} from '@polkadot/types';
 import {hexToUtf8} from '../helpers/common'
 import { NameTransfer } from "../types/models/NameTransfer";
-import { AccountHandler } from '../handlers/sub-handlers/account'
+import { AccountHandler } from '../handlers/sub-handlers/account';
 
 export async function nameTransferEvent(event: SubstrateEvent): Promise<void> {
     const { event: { data: [from_origin, to_origin, amount_origin] } } = event;
