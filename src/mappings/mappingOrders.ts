@@ -22,7 +22,7 @@ export async function orderCreatedEvent(event: SubstrateEvent): Promise<void> {
     await AccountHandler.ensureAccount(maker);
     await NFTHandler.ensureNFT(token0.toString(), token0[0].toNumber(), token0[1].toNumber());
 
-    const record = new MergeOrderAuction(order_id);
+    const record = new MergeOrderAuction('1'  + '-' + order_id);
     record.creatorId = maker;
     record.type = 1;
     record.token0Id = token0.toString();

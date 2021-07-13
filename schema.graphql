@@ -115,7 +115,7 @@ type NFT @entity {
 type AuctionHistory @entity {
   id: ID!
 
-  auction: Auction
+  auction: MergeOrderAuction
   bidder: Account
   amount: BigInt
   isWinner: Boolean

@@ -43,7 +43,7 @@ export async function auctionCreatedEvent(event: SubstrateEvent): Promise<void> 
     await AccountHandler.ensureAccount(creator);
     await NFTHandler.ensureNFT(token0.toString(), token0[0].toNumber(), token0[1].toNumber());
 
-    const record = new MergeOrderAuction(auction_id);
+    const record = new MergeOrderAuction('0' + '-' + auction_id);
     record.creatorId = creator;
     record.type = 0;
     record.token0Id = token0.toString();
