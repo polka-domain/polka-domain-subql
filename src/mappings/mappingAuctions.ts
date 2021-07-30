@@ -9,6 +9,7 @@ import { AuctionHistory } from "../types/models/AuctionHistory";
 import { NFTHandler} from "../handlers/sub-handlers/nft"
 import { AccountHandler } from '../handlers/sub-handlers/account'
 import JSONbig from 'json-bigint'
+import { NFT, Domain } from "../types";
 
 function getAuctionskey(auction_id: string): string {
     return '0' + '-' + auction_id;
@@ -133,25 +134,38 @@ export async function auctionEndEvent(event: SubstrateEvent): Promise<void> {
 
     //todo check winner is not None
     const record = await MergeOrderAuction.get(getAuctionskey(auction_id));
-    if (record && winner.isSome && final_amount.isSome) {
-        await AccountHandler.ensureAccount(winner.value.toString());
+    if (record) {
+      if (winner.isSome && final_amount.isSome) {
+          await AccountHandler.ensureAccount(winner.value.toString());
 
-        record.isTaked = true;
-        record.takerId = winner.value.toString();
-        record.takerAmount = (final_amount.value as Balance).toBigInt();
-        record.timestampTaker = event.block.timestamp;
+          record.isTaked = true;
+          record.takerId = winner.value.toString();
+          record.takerAmount = (final_amount.value as Balance).toBigInt();
+          record.timestampTaker = event.block.timestamp;
 
-        //todo use string hash as key
-        const history =  await AuctionHistory.get(auction_id + '-' + (record.auctionHistoryCount - 1));
-        history.isWinner = true;
-        await history.save();
+          //todo use string hash as key
+          const history =  await AuctionHistory.get(auction_id + '-' + (record.auctionHistoryCount - 1));
+          history.isWinner = true;
+          await history.save();
 
-        const arr = []
-        for (let i =0; i<record.auctionHistoryCount; i++ ) {
-          const r = await AuctionHistory.get(auction_id + '-' + i);
-          arr.push(r);
-        }
-        record.auctionHistoryObjArr = JSONbig.stringify({historys: arr});
-        await record.save();
+          const arr = []
+          for (let i =0; i<record.auctionHistoryCount; i++ ) {
+            const r = await AuctionHistory.get(auction_id + '-' + i);
+            arr.push(r);
+          }
+          record.auctionHistoryObjArr = JSONbig.stringify({historys: arr});
+
+          const nft = await NFT.get(record.token0Id);
+          if (nft) {
+            const domainInfo = await Domain.get(nft.domainInfoId);
+
+            if (domainInfo) {
+              domainInfo.ownerId = winner.value.toString();
+              await domainInfo.save();
+            }
+          }
+      }
+      record.isEnded = true;
+      await record.save();
     }
 }

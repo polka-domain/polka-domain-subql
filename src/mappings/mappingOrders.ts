@@ -7,7 +7,7 @@ import type {OrderId, CurrencyId, TokenId} from 'domain-types/src/interfaces/typ
 import { MergeOrderAuction } from "../types/models/MergeOrderAuction";
 import { NFTHandler} from "../handlers/sub-handlers/nft"
 import { AccountHandler } from '../handlers/sub-handlers/account'
-
+import { NFT, Domain } from "../types";
 
 //Self::deposit_event(Event::OrderCreated(order_id, maker, token0, token1, total1));
 export async function orderCreatedEvent(event: SubstrateEvent): Promise<void> {
@@ -51,6 +51,16 @@ export async function orderSwappedEvent(event: SubstrateEvent): Promise<void> {
         record.timestampTaker = event.block.timestamp;
 
         await record.save();
+
+        const nft = await NFT.get(record.token0Id);
+          if (nft) {
+            const domainInfo = await Domain.get(nft.domainInfoId);
+
+            if (domainInfo) {
+              domainInfo.ownerId = taker;
+              await domainInfo.save();
+            }
+          }
     }
 
 }

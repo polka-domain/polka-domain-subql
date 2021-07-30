@@ -137,6 +137,7 @@ type MergeOrderAuction @entity {
   endAt: BigInt
   timestampCreate: Date
 
+  isEnded: Boolean
   isCanceled: Boolean
   isTaked: Boolean
   taker: Account
