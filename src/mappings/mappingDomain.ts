@@ -39,7 +39,7 @@ function stripHexPrefix(str): any {
 function getAddress( baseAddress: string, type: number): string {
   const keyring = new Keyring();
 
-  const byteAddress = keyring.decodeAddress('5FCoTHzx6otuMaisAzDxK2PHq7MHE8HqJX4bo4UQ3kt2fn3k');
+  const byteAddress = keyring.decodeAddress(baseAddress);
   keyring.setSS58Format(type);
 
   return keyring.encodeAddress(byteAddress, type)
