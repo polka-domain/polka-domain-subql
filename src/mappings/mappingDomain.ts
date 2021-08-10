@@ -45,6 +45,14 @@ function getAddress( baseAddress: string, type: number): string {
   return keyring.encodeAddress(byteAddress, type)
 }
 
+function hex2a(hexx): string {
+  const hex = stripHexPrefix(hexx.toString());//force conversion
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2)
+      str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  return str;
+}
+
 // Self::deposit_event(Event::DomainRegistered(
 //   who,
 //   domain,
@@ -73,7 +81,7 @@ export async function domainRegisterEvent(event: SubstrateEvent): Promise<void> 
 
     record.domain = domain;
     record.ownerId = who;
-    record.bitcoin = bitcoin.isSome ? (bitcoin.unwrapOrDefault().toString()): null;
+    record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
     record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
     record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
     record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
@@ -126,7 +134,7 @@ export async function domainBindAddressEvent(event: SubstrateEvent): Promise<voi
 
     const record = await Domain.get(domain);
     if (record) {
-        record.bitcoin = bitcoin.isSome ? (bitcoin.unwrapOrDefault().toString()): null;
+        record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
         record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
         record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
         record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
