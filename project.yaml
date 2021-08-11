@@ -48,10 +48,10 @@ network:
         Burnable: 2
     DomainInfo:
       native: AccountId
-      bitcoin: Option<Vec<u8>>
-      ethereum: Option<Vec<u8>>
-      polkadot: Option<AccountId>
-      kusama: Option<AccountId>
+      bitcoin: Option<MultiAddress>
+      ethereum: Option<MultiAddress>
+      polkadot: Option<MultiAddress>
+      kusama: Option<MultiAddress>
       deposit: Balance
       nft_token: "(ClassId, TokenId)"
     TokenSymbol:
@@ -79,12 +79,6 @@ network:
       min1: Balance
       duration: BlockNumber
       start_at: BlockNumber
-    AddressChainType:
-      _enum:
-      - BTC
-      - ETH
-      - DOT
-      - KSM
 
 
 dataSources:

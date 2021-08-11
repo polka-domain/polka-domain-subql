@@ -1,5 +1,5 @@
 import { SubstrateExtrinsic, SubstrateEvent, SubstrateBlock } from "@subql/types";
-import { AccountId, Balance, BlockNumber } from '@polkadot/types/interfaces/runtime';
+import { AccountId, Balance, MultiAddress } from '@polkadot/types/interfaces/runtime';
 import type { Bytes, u32, u64, Option } from '@polkadot/types';
 import {hexToUtf8} from '../helpers/common';
 import { Domain } from "../types/models/Domain";
@@ -36,25 +36,42 @@ function stripHexPrefix(str): any {
   return isHexPrefixed(str) ? str.slice(2) : str;
 }
 
+function getAddress( baseAddress: string, type: number): string {
+  const keyring = new Keyring();
+
+  const byteAddress = keyring.decodeAddress(baseAddress);
+  keyring.setSS58Format(type);
+
+  return keyring.encodeAddress(byteAddress, type)
+}
+
+function hex2a(hexx): string {
+  const hex = stripHexPrefix(hexx.toString());//force conversion
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2)
+      str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  return str;
+}
+
 // Self::deposit_event(Event::DomainRegistered(
-//     who,
-//     domain,
-//     bitcoin,
-//     ethereum,
-//     polkadot,
-//     kusama,
-//     deposit,
-//     (T::NftClassID::get(), token_id.into()),
+//   who,
+//   domain,
+//   bitcoin,
+//   ethereum,
+//   polkadot,
+//   kusama,
+//   deposit,
+//   (T::NftClassID::get(), token_id.into()),
 // ));
 export async function domainRegisterEvent(event: SubstrateEvent): Promise<void> {
     const { event: { data: [who_origin, domain_origin, bitcoin_origin, ethereum_origin, polkadot_origin, kusama_origin, deposit_origin, token0_origin] } } = event;
     
     const who = (who_origin as AccountId).toString();
     const domain = hexToUtf8(domain_origin as Bytes);
-    const bitcoin = (bitcoin_origin as Option<Bytes>);
-    const ethereum = (ethereum_origin as Option<Bytes>);
-    const polkadot = (polkadot_origin as Option<Bytes>);
-    const kusama = (kusama_origin as Option<Bytes>);
+    const bitcoin = (bitcoin_origin as Option<MultiAddress>);
+    const ethereum = (ethereum_origin as Option<MultiAddress>);
+    const polkadot = (polkadot_origin as Option<MultiAddress>);
+    const kusama = (kusama_origin as Option<MultiAddress>);
     const deposit = (deposit_origin as Balance).toBigInt();
     const token0 = token0_origin as ITuple<[ClassId, TokenId]>;
 
@@ -64,10 +81,10 @@ export async function domainRegisterEvent(event: SubstrateEvent): Promise<void> 
 
     record.domain = domain;
     record.ownerId = who;
-    record.bitcoin = bitcoin.isSome ? bitcoin.unwrapOrDefault().toString(): null;
-    record.ethereum = ethereum.isSome ? ethereum.unwrapOrDefault().toString(): null;
-    record.polkadot = polkadot.isSome ? polkadot.unwrapOrDefault().toString(): null;
-    record.kusama = kusama.isSome ? kusama.unwrapOrDefault().toString(): null;
+    record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
+    record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
+    record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
+    record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
     record.registered = true;
     record.deposit = deposit;
 
@@ -99,35 +116,28 @@ export async function domainDeregisterEvent(event: SubstrateEvent): Promise<void
 }
 
 // Self::deposit_event(Event::BindAddress(
-//     who,
-//     domain.clone(),
-//     chain_type,
-//     address,
+//   who,
+//   domain.clone(),
+//   bitcoin,
+//   ethereum,
+//   polkadot,
+//   kusama,
 // ));
 export async function domainBindAddressEvent(event: SubstrateEvent): Promise<void> {
-    const { event: { data: [who_origin, domain_origin, chain_type_origin, address_origin] } } = event;
+    const { event: { data: [who_origin, domain_origin, bitcoin_origin, ethereum_origin, polkadot_origin, kusama_origin] } } = event;
     
     const domain = (domain_origin as Bytes).toString();
-    const chain_type = chain_type_origin as AddressChainType;
-    const address = (address_origin as Bytes).toString();
+    const bitcoin = (bitcoin_origin as Option<MultiAddress>);
+    const ethereum = (ethereum_origin as Option<MultiAddress>);
+    const polkadot = (polkadot_origin as Option<MultiAddress>);
+    const kusama = (kusama_origin as Option<MultiAddress>);
 
     const record = await Domain.get(domain);
     if (record) {
-        if (chain_type.isBtc) {
-            record.bitcoin = address;
-        } else if(chain_type.isEth) {
-            record.ethereum = address
-        } else if(chain_type.isDot) {
-            const keyring = new Keyring();
-            keyring.setSS58Format(0);
-            const newUint8Array = Uint8Array.from(Buffer.from(stripHexPrefix(address), 'hex'));
-            record.polkadot = keyring.encodeAddress(newUint8Array, 0)
-        } else if(chain_type.isKsm) {
-            const keyring = new Keyring();
-            keyring.setSS58Format(2);
-            const newUint8Array = Uint8Array.from(Buffer.from(stripHexPrefix(address), 'hex'));
-            record.kusama = keyring.encodeAddress(newUint8Array, 2)
-        }
+        record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
+        record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
+        record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
+        record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
 
         await record.save();
     }
