@@ -83,7 +83,7 @@ export async function domainRegisterEvent(event: SubstrateEvent): Promise<void> 
     record.ownerId = who;
     record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
     record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
-    record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
+    record.polkadot = polkadot.isSome ? getAddress(polkadot.unwrapOrDefault().toString(), 0): null;
     record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
     record.registered = true;
     record.deposit = deposit;
@@ -136,7 +136,7 @@ export async function domainBindAddressEvent(event: SubstrateEvent): Promise<voi
     if (record) {
         record.bitcoin = bitcoin.isSome ? (hex2a(bitcoin.unwrapOrDefault().toString())): null;
         record.ethereum = ethereum.isSome ? (ethereum.unwrapOrDefault().toString()): null;
-        record.polkadot = polkadot.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 0): null;
+        record.polkadot = polkadot.isSome ? getAddress(polkadot.unwrapOrDefault().toString(), 0): null;
         record.kusama = kusama.isSome ? getAddress(kusama.unwrapOrDefault().toString(), 2): null;
 
         await record.save();
