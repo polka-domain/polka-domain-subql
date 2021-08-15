@@ -60,6 +60,7 @@ export async function auctionCreatedEvent(event: SubstrateEvent): Promise<void> 
     record.timestampCreate = event.block.timestamp;
     record.isCanceled = false;
     record.isTaked = false;
+    record.isEnded = false; 
     record.duration = duration;
     record.startAt = start_at;
     record.endAt = end_at;
